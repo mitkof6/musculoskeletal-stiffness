@@ -1,4 +1,12 @@
+Stiffness modulation of redundant musculoskeletal systems
+===
+
 TODO DOI
+
+`git lfs install`
+
+`git lfs clone https://github.com/mitkof6/musculoskeletal-redundancy.git`
+
 
 Description
 ---
