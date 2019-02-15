@@ -93,8 +93,10 @@ def visualize_moment_arm(moment_arm_coordinate, muscle, coordinates,
         idx = coordinates.index(moment_arm_coordinate)
         poly = R[model_muscles[muscle], model_coordinates[
             moment_arm_coordinate]]
+        # poly.free_symbols is not used because it may not preserve order
+        poly_symbols = [sp.Symbol(x) for x in coordinates]
         moment_arm_poly = np.array([
-            poly.subs(dict(zip(poly.free_symbols, x))) for x in sampling_grid
+            poly.subs(dict(zip(poly_symbols, x))) for x in sampling_grid
         ], np.float)
 
         fig = plt.figure()
