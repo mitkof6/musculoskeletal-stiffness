@@ -12,8 +12,9 @@ Description
 This project contains the source code related to the following publication:
 
 Dimitar Stanev and Konstantinos Moustakas, Stiffness Modulation of
-Redundant Musculoskeletal Systems, Journal of Biomechanics, Jan. 2019,
-DOI: https://doi.org/10.1016/j.jbiomech.2019.01.017
+Redundant Musculoskeletal Systems, Journal of Biomechanics, vol. 85,
+pp. 101-107, Mar. 2019, DOI:
+https://doi.org/10.1016/j.jbiomech.2019.01.017
 
 This work presents a framework for computing the limbs' stiffness using inverse
 methods that account for the musculoskeletal redundancy effects. The

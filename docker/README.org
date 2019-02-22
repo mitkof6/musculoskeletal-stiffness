@@ -10,8 +10,8 @@
   This repository contains the setup scripts, documentation and source
   code relevant to the publication "Dimitar Stanev and Konstantinos
   Moustakas, Stiffness Modulation of Redundant Musculoskeletal
-  Systems, Journal of Biomechanics, Jan. 2019, DOI:
-  https://doi.org/10.1016/j.jbiomech.2019.01.017".
+  Systems, Journal of Biomechanics, vol. 85, pp. 101-107, Mar. 2019,
+  DOI: https://doi.org/10.1016/j.jbiomech.2019.01.017".
 
 * How to run the Docker image
 
