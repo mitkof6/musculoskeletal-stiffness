@@ -1,6 +1,9 @@
 Stiffness modulation of redundant musculoskeletal systems
 ===
 
+[![DOI](https://zenodo.org/badge/157207358.svg)](https://zenodo.org/badge/latestdoi/157207358)
+
+
 `git lfs install`
 
 `git lfs clone https://github.com/mitkof6/musculoskeletal-redundancy.git`
