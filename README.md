@@ -1,8 +1,6 @@
 Stiffness modulation of redundant musculoskeletal systems
 ===
 
-TODO DOI
-
 `git lfs install`
 
 `git lfs clone https://github.com/mitkof6/musculoskeletal-redundancy.git`
@@ -13,9 +11,9 @@ Description
 
 This project contains the source code related to the following publication:
 
-Dimitar Stanev, and Konstantinos Moustakas, Stiffness Modulation of Redundant
-Musculoskeletal Systems, Journal of Biomechanics, Jan. 2019, DOI:
-https://doi.org/10.1016/j.jbiomech.2019.01.017
+Dimitar Stanev and Konstantinos Moustakas, Stiffness Modulation of
+Redundant Musculoskeletal Systems, Journal of Biomechanics, Jan. 2019,
+DOI: https://doi.org/10.1016/j.jbiomech.2019.01.017
 
 This work presents a framework for computing the limbs' stiffness using inverse
 methods that account for the musculoskeletal redundancy effects. The
