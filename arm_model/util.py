@@ -540,7 +540,7 @@ def test_ellipse():
     xc = vec([0, 0])
     M = mat([[2, 1], [1, 2]])
     # M = mat([[-2.75032375, -11.82938331], [-11.82938331, -53.5627191]])
-    print np.linalg.matrix_rank(M)
+    print(np.linalg.matrix_rank(M))
     phi, l, v = draw_ellipse(ax, xc, M, 1, True)
     print(phi, l, v)
     ax.set_xlabel('x')

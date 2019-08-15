@@ -4,14 +4,15 @@
 #
 import os
 import opensim
+import regex
 from tqdm import tqdm
 import numpy as np
 from util import plot_sto
 
 
 def calculate_muscle_data(model_file, ik_file):
-    """This function calculates the moment arm and maximum muscle force provided an
-    OpenSim model and a motion from inverse kinematics.
+    """This function calculates the moment arm and maximum muscle force
+    provided an OpenSim model and a motion from inverse kinematics.
 
     Parameters
     ----------
@@ -24,6 +25,7 @@ def calculate_muscle_data(model_file, ik_file):
     -------
     tuple:
         (moment arm[time x coordinates x muscles], max_force[time x muscles])
+
     """
     model = opensim.Model(model_file)
     state = model.initSystem()
@@ -79,6 +81,56 @@ def calculate_muscle_data(model_file, ik_file):
             max_force[t, muscle_index] = muscle.getMaxIsometricForce()
 
     return (moment_arm, max_force)
+
+
+def getMuscleIndices(model_file, exclude_pattern):
+    """Gets the indices of the muscles that do not satisfy the exclude
+    pattern.
+
+    Parameters
+    ----------
+
+    model_file: string
+         path to .osim file
+
+    exclude_pattern: string
+         regular expression for excluding muscles
+    """
+    model = opensim.Model(model_file)
+    model.initSystem()
+
+    muscle_indices = []
+    pattern = regex.compile(exclude_pattern)
+    for i, muscle in enumerate(model.getMuscles()):
+        if not regex.match(pattern, muscle.getName()):
+            muscle_indices.append(i)
+
+    return muscle_indices
+
+
+def getCoordinateIndices(model_file, exclude_pattern):
+    """Gets the indices of the generalized coordinates that do not satisfy
+    the exclude pattern.
+
+    Parameters
+    ----------
+
+    model_file: string
+        path to .osim file
+
+    exclude_pattern: string 
+        regular expression for excluding coordinates
+    """
+    model = opensim.Model(model_file)
+    model.initSystem()
+
+    coordinate_indices = []
+    pattern = regex.compile(exclude_pattern)
+    for i, coordinate in enumerate(model.getCoordinateSet()):
+        if not regex.match(pattern, coordinate.getName()):
+            coordinate_indices.append(i)
+
+    return coordinate_indices
 
 
 def construct_ik_task_set(model, marker_data, task_set):
@@ -156,6 +208,51 @@ def visualize_ik_results(ik_file, ik_errors=None):
     plot_sto(ik_file, 4)
     if ik_errors is not None:
         plot_sto(ik_errors, 3)
+
+
+def perform_id(model_file, ik_file, grf_file, grf_xml, results_dir):
+    """Performs inverse dynamics using OpenSim.
+
+    Parameters
+    ----------
+    model_file: str
+        OpenSim model (.osim)
+    ik_file: str
+        kinematics calculated from Inverse Kinematics
+    grf_file: str
+        the ground reaction forces
+    grf_xml: str
+        xml description containing how to apply the GRF forces
+    results_dir: str
+        directory to store the results
+    """
+    # model
+    model = opensim.Model(model_file)
+    # prepare external forces xml file
+    name = os.path.basename(grf_file)[:-8]
+    external_loads = opensim.ExternalLoads(grf_xml, True)
+    external_loads.setExternalLoadsModelKinematicsFileName(ik_file)
+    external_loads.setDataFileName(grf_file)
+    external_loads.setLowpassCutoffFrequencyForLoadKinematics(6)
+    external_loads.printToXML(results_dir + name + '.xml')
+    # id tool
+    analysis = opensim.InverseDynamicsTool()
+    analysis.setLowpassCutoffFrequency(6)
+    analysis.setModel(model)
+    motion = opensim.Storage(ik_file)
+    analysis.setStartTime(motion.getFirstTime())
+    analysis.setEndTime(motion.getLastTime())
+    analysis.setCoordinatesFileName(ik_file)
+    analysis.setExternalLoadsFileName(results_dir + name + '.xml')
+    # analysis.setLoadModelAndInput(True)
+    analysis.setOutputGenForceFileName(name + "_id.sto")
+    analysis.setResultsDir(results_dir)
+    # if muscles are not excluded then the results are wrong (very high)
+    forces_to_exclude = opensim.ArrayStr()
+    forces_to_exclude.append("Muscles")
+    analysis.setExcludedForces(forces_to_exclude)
+    analysis.run()
+    return results_dir + name + '_id.sto'
 
 
 def perform_so(model_file, ik_file, grf_file, grf_xml, reserve_actuators,
@@ -268,9 +365,9 @@ def perform_jra(model_file, ik_file, grf_file, grf_xml, reserve_actuators,
     # prepare external forces xml file
     name = os.path.basename(grf_file)[:-8]
     external_loads = opensim.ExternalLoads(model, grf_xml)
+    external_loads.setLowpassCutoffFrequencyForLoadKinematics(6)
     external_loads.setExternalLoadsModelKinematicsFileName(ik_file)
     external_loads.setDataFileName(grf_file)
-    external_loads.setLowpassCutoffFrequencyForLoadKinematics(6)
     external_loads.printToXML(results_dir + name + '.xml')
 
     # TODO this may not be needed

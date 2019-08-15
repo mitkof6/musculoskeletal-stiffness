@@ -7,7 +7,7 @@ three steps:
 
 1. Extract the symbolic representation of the muscle moment arm from the OpenSim
    model, where higher order derivatives are required for the calculation of the
-   stiffness [script](analytic_moment_arm.py).
+   stiffness [script](symbolic_moment_arm.py).
 2. Calculate the feasible muscle forces that satisfy the movement under study
    [script](feasible_muscle_forces.py).
 3. Calculate the feasible joint stiffness [script](feasible_joint_stiffness.py).
@@ -26,13 +26,14 @@ contain the pre-executed results of the demo.
 Dependencies
 ---
 
-- OpenSim: python wrappings [Tested Version](https://github.com/mitkof6/opensim-core/tree/stable_2)
+- OpenSim v4.0: python wrappings
 - sympy: `pip install sympy`
 - numpy: `pip install numpy`
-- matplotlib: `pip install matplotlib`
+- matplotlib: (local copy with fixes)
 - multipolyfit: `pip install multipolyfit` for multivariate polynomial fitting
 - tqdm: `pip install tqdm` for progress bar
 - pycddlib (`pip install pycddlib`) for finding the feasible muscle force set
+  (not used by default)
 - cython (for pycddlib)
 - lrs (command line tool see /lrslib-062 folder)
 

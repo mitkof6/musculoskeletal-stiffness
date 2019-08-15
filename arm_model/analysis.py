@@ -284,9 +284,9 @@ class StiffnessAnalysis:
 
         # color_cycle = ax[1]._get_lines.prop_cycler
         # color = next(color_cycle)['color']
-        color = self.color.next()
-        marker = self.marker.next()
-        linestyle = self.linestyle.next()
+        color = self.color.__next__()
+        marker = self.marker.__next__()
+        linestyle = self.linestyle.__next__()
         data = pd.DataFrame()
         data['area'] = area
         data['phi'] = phi
@@ -322,7 +322,7 @@ class StiffnessAnalysis:
                     .rename(columns={'level_2': 'Joint', 0: 'Stiffness'})
                     .drop('level_0', axis='columns'), ax=ax[2])
         for b in boxplot.artists:
-            b.set_hatch(self.hatch.next())
+            b.set_hatch(self.hatch.__next__())
 
         boxplot.legend()
         ax[2].set_xlabel('time $(s)$')

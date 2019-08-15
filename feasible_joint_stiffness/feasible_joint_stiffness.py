@@ -13,16 +13,22 @@ plt.rcParams['font.size'] = 13
 
 
 def calculate_feasible_joint_stiffness(model_file, ik_file, results_dir):
-    """The calculation of the feasible joint stiffness is described in more detailed
-    [2].
+    """The calculation of the feasible joint stiffness is described in
+    more detailed [2].
 
     [2] D. Stanev and K. Moustakas, Stiffness Modulation of Redundant
-        Musculoskeletal Systems, Journal of Biomechanics}, accepted Jan. 2019
+        Musculoskeletal Systems, Journal of Biomechanics}, accepted
+        Jan. 2019
 
     """
     print('Initialization ...')
-    f_set = pickle.load(file(results_dir + 'f_set.dat', 'r'))  # feasible set
-    R = pickle.load(file(results_dir + 'R.dat', 'r'))  # analytic moment arm
+    f_set = []
+    R = []
+    with open(results_dir + 'f_set.dat', 'rb') as f_s, \
+         open(results_dir + 'R.dat', 'rb') as f_r:
+        f_set = pickle.load(f_s)
+        R = pickle.load(f_r)
+
     RT = R.transpose()
 
     # load OpenSim data
@@ -30,9 +36,10 @@ def calculate_feasible_joint_stiffness(model_file, ik_file, results_dir):
     ik_header, ik_labels, ik_data = readMotionFile(ik_file)
     ik_data = np.array(ik_data)
     time = ik_data[:, 0]
-    assert (ik_data.shape[0] == len(f_set))
+    assert(ik_data.shape[0] == len(f_set))
     coordinates = ik_labels[1:]
-    pickle.dump(ik_labels, file(results_dir + 'ik_labels.dat', 'w'))
+    with open(results_dir + 'ik_labels.dat', 'wb') as fo:
+        pickle.dump(ik_labels, fo)
 
     # calculate symbolic derivatives
     q = [sp.Symbol(c) for c in coordinates]
@@ -54,7 +61,7 @@ def calculate_feasible_joint_stiffness(model_file, ik_file, results_dir):
         RTDq_temp = to_np_array(RTDq.subs(configuration))  # 3D array
         Kj = []
         for fm in f_set[i]:
-            assert (np.all(fm > -1e-5) == True)
+            assert(np.all(fm > -1e-5) == True)
             # calculate muscle stiffness from sort range stiffness (ignores
             # tendon stiffness)
             gamma = 23.5
@@ -72,19 +79,30 @@ def calculate_feasible_joint_stiffness(model_file, ik_file, results_dir):
     # serialization
     Kj_min = np.array(Kj_min)
     Kj_max = np.array(Kj_max)
-    pickle.dump(Kj_min, file(results_dir + 'Kj_min.dat', 'w'))
-    pickle.dump(Kj_max, file(results_dir + 'Kj_max.dat', 'w'))
-    pickle.dump(time, file(results_dir + 'time.dat', 'w'))
+    with open(results_dir + 'Kj_min.dat', 'wb') as f_kj_min, \
+         open(results_dir + 'Kj_max.dat', 'wb') as f_kj_max, \
+         open(results_dir + 'time.dat', 'wb') as f_time:
+        pickle.dump(Kj_min, f_kj_min)
+        pickle.dump(Kj_max, f_kj_max)
+        pickle.dump(time, f_time)
 
 
 def visualize_feasible_joint_stiffness(results_dir, figures_dir):
     """Visualize feasible joint stiffness.
     """
     # load data
-    Kj_min = pickle.load(file(results_dir + 'Kj_min.dat', 'r'))
-    Kj_max = pickle.load(file(results_dir + 'Kj_max.dat', 'r'))
-    time = pickle.load(file(results_dir + 'time.dat', 'r'))
-    ik_labels = pickle.load(file(results_dir + 'ik_labels.dat', 'r'))
+    Kj_min = []
+    Kj_max = []
+    time = []
+    ik_labels = []
+    with open(results_dir + 'Kj_min.dat', 'rb') as f_kj_min, \
+         open(results_dir + 'Kj_max.dat', 'rb') as f_kj_max, \
+         open(results_dir + 'time.dat', 'rb') as f_time, \
+         open(results_dir + 'ik_labels.dat', 'rb') as f_ik_leb:
+        Kj_min = pickle.load(f_kj_min)
+        Kj_max = pickle.load(f_kj_max)
+        time = pickle.load(f_time)
+        ik_labels = pickle.load(f_ik_leb)
 
     # remove flexion and angle from labels (reviewer comments)
     ik_labels = [l.replace('flexion_', '') for l in ik_labels]
@@ -124,32 +142,28 @@ def visualize_feasible_joint_stiffness(results_dir, figures_dir):
                 format='png', dpi=300)
     fig.savefig(figures_dir + 'feasible_joint_stiffness.pdf',
                 format='pdf', dpi=300)
-    # print('transparency loss in eps: use pdfcrop feasible_joint_stiffness.pdf
-    # feasible_joint_stiffness.eps')
 
 
-###############################################################################
+#############################################################################
 # main
 
 def main():
     # initialization and computation takes time
     compute = True
-    subject_dir = os.getcwd() + '/../dataset/Gait10dof18musc/'
-    model_file = subject_dir + 'subject01.osim'
-    ik_file = os.getcwd() + '/notebook_results/subject01_walk_ik.mot'
-    results_dir = os.getcwd() + '/notebook_results/'
-    figures_dir = os.getcwd() + '/results/'
+    subject_dir = os.getcwd() + '/../data/gait1018/'
+    model_file = subject_dir + 'subject01_scaled.osim'
+    ik_file = os.getcwd() + '/results/subject01_walk1_ik.mot'
+    results_dir = os.getcwd() + '/results/'
 
     # read opensim files
     if not (os.path.isfile(model_file) and
             os.path.isfile(ik_file)):
         raise RuntimeError('required files do not exist')
 
-    if not (os.path.isdir(results_dir) and
-            os.path.isdir(figures_dir)):
+    if not os.path.isdir(results_dir):
         raise RuntimeError('required folders do not exist')
 
     if compute:
         calculate_feasible_joint_stiffness(model_file, ik_file, results_dir)
 
-    visualize_feasible_joint_stiffness(results_dir, figures_dir)
+    visualize_feasible_joint_stiffness(results_dir, results_dir)
