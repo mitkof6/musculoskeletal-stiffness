@@ -370,7 +370,10 @@ def visualize_so_results(activations_file, forces_file=None):
 
 
 def perform_jra(model_file, ik_file, grf_file, grf_xml, reserve_actuators,
-                muscle_forces_file, results_dir, prefix=''):
+                muscle_forces_file, results_dir, prefix='',
+                joint_names=['All'],
+                apply_on_bodies=['parent'],
+                express_in_frame=['ground']):
     """Performs Static Optimization using OpenSim.
 
     Parameters
@@ -391,21 +394,29 @@ def perform_jra(model_file, ik_file, grf_file, grf_xml, reserve_actuators,
         directory to store the results
     prefix: str
         prefix of the resultant joint reaction loads
+    joint_names: list
+        joint names of interest
+    apply_on_bodies: list
+        apply on child or parent
+    express_in_frame: list
+        frame to express results
     """
+    assert(len(joint_names) == len(apply_on_bodies) == len(express_in_frame))
+
     # model
     model = opensim.Model(model_file)
 
     # prepare external forces xml file
     name = os.path.basename(grf_file)[:-8]
     external_loads = opensim.ExternalLoads(grf_xml, True)
-    external_loads.setLowpassCutoffFrequencyForLoadKinematics(6)
     external_loads.setExternalLoadsModelKinematicsFileName(ik_file)
     external_loads.setDataFileName(grf_file)
+    external_loads.setLowpassCutoffFrequencyForLoadKinematics(6)
     external_loads.printToXML(results_dir + name + '.xml')
 
     # TODO this may not be needed
     # add reserve actuators (must not be appended when performing JRA)
-    force_set = opensim.SetForce(reserve_actuators, True)
+    force_set = opensim.SetForces(reserve_actuators, True)
     force_set.setMemoryOwner(False)  # model will be the owner
     for i in range(0, force_set.getSize()):
         model.updForceSet().append(force_set.get(i))
@@ -417,7 +428,19 @@ def perform_jra(model_file, ik_file, grf_file, grf_xml, reserve_actuators,
     joint_reaction.setStartTime(motion.getFirstTime())
     joint_reaction.setEndTime(motion.getLastTime())
     joint_reaction.setForcesFileName(muscle_forces_file)
-    model.addAnalysis(joint_reaction)
+    joint_names_arr = opensim.ArrayStr()
+    apply_on_bodies_arr = opensim.ArrayStr()
+    express_in_frame_arr = opensim.ArrayStr()
+    for j, b, f in zip(joint_names, apply_on_bodies, express_in_frame):
+        joint_names_arr.append(j)
+        apply_on_bodies_arr.append(b)
+        express_in_frame_arr.append(f)
+
+    joint_reaction.setJointNames(joint_names_arr)
+    joint_reaction.setOnBody(apply_on_bodies_arr)
+    joint_reaction.setInFrame(express_in_frame_arr)
+    # model.addAnalysis(joint_reaction)
+    model.updAnalysisSet().adoptAndAppend(joint_reaction)
     model.initSystem()
 
     # analysis

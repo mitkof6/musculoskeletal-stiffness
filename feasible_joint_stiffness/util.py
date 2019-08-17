@@ -5,12 +5,13 @@ import os
 import sympy as sp
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 # from mpl_toolkits.mplot3d import Axes3D
 from fractions import Fraction
 
 
-def plot_sto(sto_file, plots_per_row, pattern=None, save=False,
-             fig_format='.pdf'):
+def plot_sto(sto_file, plots_per_row, plot_file, pattern=None,
+             title_function=lambda x: x):
     """Plots the .sto file (OpenSim) by constructing a grid of subplots.
 
     Parameters
@@ -19,13 +20,15 @@ def plot_sto(sto_file, plots_per_row, pattern=None, save=False,
         path to file
     plots_per_row: int
         subplot columns
+    plot_file: str
+        path to store results
     pattern: str, optional, default=None
         plot based on pattern (e.g. only pelvis coordinates)
-    save: bool default=False
-        save figures
-    fig_format: str, optional, default='.pdf'
-        format to store the generated plot
+    title_function: lambda
+        callable function f(str) -> str
     """
+    assert('pdf' in plot_file)
+
     header, labels, data = readMotionFile(sto_file)
     data = np.array(data)
     indices = []
@@ -35,25 +38,25 @@ def plot_sto(sto_file, plots_per_row, pattern=None, save=False,
         indices = range(1, len(labels))
 
     n = len(indices)
-    nrows = int(np.ceil(float(n) / plots_per_row))
     ncols = int(plots_per_row)
+    nrows = int(np.ceil(float(n) / plots_per_row))
+    pages = int(np.ceil(float(nrows) / ncols))
     if ncols > n:
         ncols = n
 
-    fig, ax = plt.subplots(nrows=nrows, ncols=ncols,
-                           figsize=(20, 20), sharey=False)
-    ax = ax.flatten()
-    for p, i in enumerate(indices):
-        ax[p].plot(data[:, 0], data[:, i])
-        ax[p].set_title(labels[i])
-        ax[p].set_xlabel('time (s)')
-        # ax[i - 1].set_ylabel('coordinate (deg)')
+    with PdfPages(plot_file) as pdf:
+        for page in range(0, pages):
+            fig, ax = plt.subplots(nrows=ncols, ncols=ncols,
+                                   figsize=(8, 8))
+            ax = ax.flatten()
+            for pl, col in enumerate(indices[page * ncols ** 2:page *
+                                             ncols ** 2 + ncols ** 2]):
+                ax[pl].plot(data[:, 0], data[:, col])
+                ax[pl].set_title(title_function(labels[col]))
 
-    fig.tight_layout()
-    fig.show()
-
-    if save:
-        fig.savefig(sto_file[:-4] + fig_format, dpi=300)
+            fig.tight_layout()
+            pdf.savefig(fig)
+            plt.close()
 
 
 def tensor3_vector_product(T, v):
