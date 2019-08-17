@@ -49,6 +49,7 @@ Repository Overview
 ---
 
 - arm_model: simulation of simple arm model and feasible task stiffness
+- data: contains the OpenSim model being used for the case studies
 - feasible_joint_stiffness: calculation of the feasible joint stiffness loads,
   by accounting for musculoskeletal redundancy effects
 - docker: a self contained docker setup file, which installs all dependencies

@@ -1,3 +1,6 @@
+# Calculation and visualization of the feasible joint stiffness.
+#
+# @author Dimitar Stanev (stanev@ece.upatras.gr)
 import os
 import pickle
 import opensim
@@ -9,7 +12,7 @@ from util import readMotionFile, to_np_mat, to_np_array
 plt.rcParams['font.size'] = 13
 
 ###############################################################################
-# calculations
+# functionality
 
 
 def calculate_feasible_joint_stiffness(model_file, ik_file, results_dir):
@@ -22,8 +25,6 @@ def calculate_feasible_joint_stiffness(model_file, ik_file, results_dir):
 
     """
     print('Initialization ...')
-    f_set = []
-    R = []
     with open(results_dir + 'f_set.dat', 'rb') as f_s, \
          open(results_dir + 'R.dat', 'rb') as f_r:
         f_set = pickle.load(f_s)

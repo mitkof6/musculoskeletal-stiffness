@@ -1,5 +1,6 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+# A variety of useful utilities.
+#
+# @author Dimitar Stanev (stanev@ece.upatras.gr)
 import os
 import sympy as sp
 import numpy as np
@@ -125,8 +126,8 @@ def vec(vector):
 
 
 def to_np_array(sympy_mat):
-    """Cast sympy Matrix to numpy matrix of float type. Works for N-D matrices as
-    compared to to_np_mat().
+    """Cast sympy Matrix to numpy matrix of float type. Works for N-D
+    matrices as compared to to_np_mat().
 
     Parameters
     ----------
@@ -239,8 +240,8 @@ def lrs_inequality_vertex_enumeration(A, b):
 
 
 def ccd_inequality_vertex_enumeration(A, b):
-    """Find the vertices given an inequality system A * x <= b. This function
-    depends on pycddlib (cdd).
+    """Find the vertices given an inequality system A * x <= b. This
+    function depends on pycddlib (cdd).
 
     Parameters
     ----------
@@ -280,9 +281,10 @@ def ccd_inequality_vertex_enumeration(A, b):
 
 def convex_bounded_vertex_enumeration(A, b, convex_combination_passes=1,
                                       method='lrs'):
-    """Sample a convex, bounded inequality system A * x <= b. The vertices of the
-    convex polytope are first determined. Then the convexity property is used to
-    generate additional solutions within the polytope.
+    """Sample a convex, bounded inequality system A * x <= b. The vertices
+    of the convex polytope are first determined. Then the convexity
+    property is used to generate additional solutions within the
+    polytope.
 
     Parameters
     ----------
@@ -292,8 +294,8 @@ def convex_bounded_vertex_enumeration(A, b, convex_combination_passes=1,
     b: numpy array [m]
 
     convex_combination_passes: int (default 1)
-        recombine vertices to generate additional solutions using the convex
-        property
+        recombine vertices to generate additional solutions using the
+        convex property
 
     method: str (lrs or cdd)
 
@@ -457,8 +459,8 @@ def readMotionFile(filename):
 
 
 def index_containing_substring(list_str, pattern):
-    """For a given list of strings finds the index of the element that contains the
-    substring.
+    """For a given list of strings finds the index of the element that
+    contains the substring.
 
     Parameters
     ----------
@@ -549,8 +551,8 @@ def cartesian(arrays, out=None):
 
 
 def construct_coordinate_grid(model, coordinates, N=5):
-    """Given n coordinates get the coordinate range and generate a coordinate grid
-    of combinations using cartesian product.
+    """Given n coordinates get the coordinate range and generate a
+    coordinate grid of combinations using cartesian product.
 
     Parameters
     ----------

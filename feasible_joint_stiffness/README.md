@@ -13,10 +13,10 @@ three steps:
 3. Calculate the feasible joint stiffness [script](feasible_joint_stiffness.py).
 
 The user can navigate into the corresponding folders and inspect the source
-code. The following case study us provided in the form of interactive Jupyter
+code. The following case study is provided in the form of interactive Jupyter
 notebook:
 
-- [Feasible Joint Stiffness](feasible_joint_stiffnss/feasible_joint_stiffnss.ipynb) calculates
+- [Feasible Joint Stiffness](feasible_joint_stiffnss.ipynb) calculates
   the feasible joint stiffness of an OpenSim model during walking
 
 The .html file corresponding to the .ipynb notebook included in the folder
@@ -26,38 +26,41 @@ contain the pre-executed results of the demo.
 Dependencies
 ---
 
+- Tested with Python 3.7
 - OpenSim v4.0: python wrappings
 - sympy: `pip install sympy`
 - numpy: `pip install numpy`
-- matplotlib: (local copy with fixes)
+- matplotlib: (local copy with fixes that work with Python 3.7)
 - multipolyfit: `pip install multipolyfit` for multivariate polynomial fitting
 - tqdm: `pip install tqdm` for progress bar
-- pycddlib (`pip install pycddlib`) for finding the feasible muscle force set
-  (not used by default)
-- cython (for pycddlib)
-- lrs (command line tool see /lrslib-062 folder)
+- pycddlib: `pip install pycddlib` for finding the feasible muscle
+  force set (not used by default)
+- cython: (for pycddlib)
+- lrs: can be installed with a package manager (command line tool see
+  /lrslib-062 folder)
 
 
 Symbolic Derivation of the Muscle Moment Arm Matrix (OpenSim v4.0)
 ---
 
-[OpenSim](https://github.com/opensim-org/opensim-core) is a framework for
-modeling and simulation of musculoskeletal systems. The muscle moment arm is an
-important variable for evaluating the effectiveness of a muscle to actuate a
-particular joint. Calculating the muscle moment arm requires knowledge of the
-muscle path and wrapping surfaces. OpenSim is restricted to evaluate the muscle
-moment arm at an arbitrary configuration (e.g., <a
+[OpenSim](https://github.com/opensim-org/opensim-core) is a framework
+for modeling and simulation of musculoskeletal systems. The muscle
+moment arm is an important variable for evaluating the effectiveness
+of a muscle to actuate a particular joint. Calculating the muscle
+moment arm requires knowledge of the muscle path and wrapping
+surfaces. OpenSim is restricted to evaluate the muscle moment arm at
+an arbitrary configuration (e.g., <a
 href="https://www.codecogs.com/eqnedit.php?latex=R(q)&space;\in&space;\mathcal{R}^{n&space;x&space;m},&space;q&space;\in&space;\mathcal{R}^{n}"
 target="_blank"><img
 src="https://latex.codecogs.com/gif.latex?R(q)&space;\in&space;\mathcal{R}^{n&space;x&space;m},&space;q&space;\in&space;\mathcal{R}^{n}"
-title="R(q) \in \mathcal{R}^{n x m}, q \in \mathcal{R}^{n}" /></a> with *n*
-degrees of freedom and *m* muscles), lacking the information for calculating
-higher order derivatives (e.g., <a
+title="R(q) \in \mathcal{R}^{n x m}, q \in \mathcal{R}^{n}" /></a>
+with *n* degrees of freedom and *m* muscles), lacking the information
+for calculating higher order derivatives (e.g., <a
 href="https://www.codecogs.com/eqnedit.php?latex=\partial&space;R(q)&space;/&space;\partial&space;q"
 target="_blank"><img
 src="https://latex.codecogs.com/gif.latex?\partial&space;R(q)&space;/&space;\partial&space;q"
-title="\partial R(q) / \partial q" /></a>).  Visual inspection of the polynomial
-fitting is provided below.
+title="\partial R(q) / \partial q" /></a>).  Visual inspection of the
+polynomial fitting is provided below.
 
 
 ![Moment arm of vasti_r at knee joint](results/vasti_r_knee_angle_r.png)

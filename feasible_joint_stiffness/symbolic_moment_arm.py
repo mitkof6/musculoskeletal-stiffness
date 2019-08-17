@@ -7,6 +7,7 @@
 # Dependencies: opensim, matplotlib, numpy, sympy, multipolyfit, tqdm
 #
 # @author Dimitar Stanev (stanev@ece.upatras.gr)
+import os
 import csv
 import pickle
 import opensim
@@ -62,7 +63,8 @@ def visualize_moment_arm(moment_arm_coordinate, muscle, coordinates,
         sampling_grid = sampling_dict[muscle]['sampling_grid']
         moment_arm = sampling_dict[muscle]['moment_arm']
         idx = coordinates.index(moment_arm_coordinate)
-        poly = R[model_muscles[muscle], model_coordinates[moment_arm_coordinate]]
+        poly = R[model_muscles[muscle],
+                 model_coordinates[moment_arm_coordinate]]
         moment_arm_poly = np.array([
             poly.subs(dict(zip(poly.free_symbols, x))) for x in sampling_grid
         ], np.float)
@@ -80,7 +82,7 @@ def visualize_moment_arm(moment_arm_coordinate, muscle, coordinates,
         ax.legend()
         fig.tight_layout()
         pdf.savefig(fig)
-        plt.close()
+        # plt.close()
     elif isinstance(coordinates, list) and len(coordinates) == 2:
         # coordinates = sampling_dict[muscle]['coordinates']
         sampling_grid = sampling_dict[muscle]['sampling_grid']
@@ -122,7 +124,7 @@ def visualize_moment_arm(moment_arm_coordinate, muscle, coordinates,
         ax.legend()
         fig.tight_layout()
         pdf.savefig(fig)
-        plt.close()
+        # plt.close()
     else:
         return
 
@@ -144,7 +146,7 @@ def calculate_moment_arm_symbolically(model_file, results_dir):
     # load opensim model
     model = opensim.Model(model_file)
     state = model.initSystem()
-    
+
     model_coordinates = {}
     for i, coordinate in enumerate(model.getCoordinateSet()):
         model_coordinates[coordinate.getName()] = i
@@ -169,7 +171,7 @@ def calculate_moment_arm_symbolically(model_file, results_dir):
         for q in sampling_grid:
             for i, coordinate in enumerate(coordinates):
                 model.updCoordinateSet().get(coordinate).setValue(state, q[i])
-                
+
             model.realizePosition(state)
             tmp = []
             for coordinate in coordinates:
@@ -199,8 +201,8 @@ def calculate_moment_arm_symbolically(model_file, results_dir):
             free_symbols = list(polynomial.free_symbols)
             if len(free_symbols) > 1 and \
                str(free_symbols[0]) > str(free_symbols[1]):
-                   free_symbols = free_symbols[::-1]
-            
+                free_symbols = free_symbols[::-1]
+
             polynomial = polynomial.subs(
                 dict(zip(free_symbols, [sp.Symbol(x) for x in coordinates])))
             muscle_moment_row[model_coordinates[coordinate]] = polynomial
@@ -318,10 +320,6 @@ def main():
         calculate_moment_arm_symbolically(model_file, results_dir)
 
     if visualize:
-        R = []
-        sampling_dict = []
-        model_coordinates = []
-        model_muscles = []
         with open(results_dir + 'R.dat', 'rb') as f_r,\
                 open(results_dir + 'sampling_dict.dat', 'rb') as f_sd,\
                 open(results_dir + 'model_coordinates.dat', 'rb') as f_mc,\

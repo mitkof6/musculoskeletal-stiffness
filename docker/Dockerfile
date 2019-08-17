@@ -19,21 +19,21 @@ RUN pip install scipy numpy sympy pandas seaborn matplotlib \
 pycddlib tqdm pydy jupyter multipolyfit
 
 # install and setup OpenSim
-ADD opensim-core-stable2.tar.xz /root/
-ENV SIMBODY_HOME=/root/opensim-core-stable2/dep/simbody
+ADD opensim-core-stable3.tar.xz /root/
+ENV SIMBODY_HOME=/root/opensim-core-stable3/dependencies/simbody
 ENV Simbody_DIR=$SIMBODY_HOME/lib/cmake/simbody
 ENV PATH=$SIMBODY_HOME/libexec/simbody:$PATH
 ENV LD_LIBRARY_PATH=$SIMBODY_HOME/lib:$LD_LIBRARY_PATH
-ENV OPENSIM_HOME=/root/opensim-core-stable2
-ENV OpenSim_DIR=$OPENSIM_HOME/lib/cmake/OpenSim
+ENV OPENSIM_HOME=/root/opensim-core-stable3
+ENV OpenSim_DIR=$OPENSIM_HOME/lib64/cmake/OpenSim
 ENV LD_LIBRARY_PATH=$OPENSIM_HOME/lib:$LD_LIBRARY_PATH
-RUN cd /root/opensim-core-stable2/lib/python2.7/site-packages \
+RUN cd /root/opensim-core-stable3/lib/python3.7/site-packages \
 && python setup.py install
 
 # copy demos to default directory
 ADD arm_model.tar.xz /root/
 ADD feasible_joint_stiffness.tar.xz /root/
-ADD dataset.tar.xz /root/
+ADD data.tar.xz /root/
 
 # make port 80 available to the outside
 EXPOSE 80

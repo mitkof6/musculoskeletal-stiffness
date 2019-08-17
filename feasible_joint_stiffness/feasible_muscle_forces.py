@@ -14,11 +14,13 @@ from util import null_space, construct_muscle_space_inequality, \
     convex_bounded_vertex_enumeration, readMotionFile
 
 ###############################################################################
-# utilities
+# functionality
 
 
-def calculate_feasible_muscle_forces(model_file, ik_file, id_file, results_dir,
-                                     excluded_coordinates, excluded_muscles):
+def calculate_feasible_muscle_forces(model_file, ik_file, id_file,
+                                     excluded_coordinates,
+                                     excluded_muscles,
+                                     results_dir):
     """The calculation of the feasible muscle forces that satisfy the
     movement and physiological muscle constraints is based on the
     method developed in [1].
@@ -28,19 +30,19 @@ def calculate_feasible_muscle_forces(model_file, ik_file, id_file, results_dir,
         e0209171, Jan. 2019, DOI: https://doi.org/10.1371/journal.pone.0209171
 
     """
-    moment_arm, max_force = calculate_muscle_data(model_file, ik_file)
-    coordinate_indices = getCoordinateIndices(model_file, excluded_coordinates)
-    muscle_indices = getMuscleIndices(model_file, excluded_muscles)
-    print('Active coordinates: ', coordinate_indices)
-    print('Actuve muscles: ', muscle_indices)
-
     ik_header, ik_labels, ik_data = readMotionFile(ik_file)
     ik_data = np.array(ik_data)
     id_header, id_labels, id_data = readMotionFile(id_file)
     id_data = np.array(id_data)
+    moment_arm, max_force = calculate_muscle_data(model_file, ik_file)
+    model_coordinate_indices, id_coordinate_indices = getCoordinateIndices(
+        model_file, id_labels, excluded_coordinates)
+    muscle_indices = getMuscleIndices(model_file, excluded_muscles)
+    print('Active id coordinates: ', id_coordinate_indices)
+    print('Active model coordinates: ', model_coordinate_indices)
+    print('Actuve muscles: ', muscle_indices)
 
     time = ik_data[:, 0]
-    id_data = id_data[:, 1:]  # remove first column
     entries = time.shape[0]
 
     # collect quantities for computing the feasible muscle forces
@@ -51,8 +53,8 @@ def calculate_feasible_muscle_forces(model_file, ik_file, id_file, results_dir,
     print('Collecting data ...')
     for t in tqdm(range(entries)):
         # get tau, R, Fmax
-        tau = id_data[t, coordinate_indices]
-        RT = moment_arm[t, coordinate_indices, :]
+        tau = id_data[t, id_coordinate_indices]
+        RT = moment_arm[t, model_coordinate_indices, :]
         RT = RT[:, muscle_indices]
         RBarT = np.linalg.pinv(RT)
         fmax = max_force[t, muscle_indices]
@@ -116,6 +118,7 @@ def main():
     ik_file = perform_ik(model_file, trc_file, results_dir)
     id_file = perform_id(model_file, ik_file, grf_file, grf_xml_file,
                          results_dir)
-    calculate_feasible_muscle_forces(model_file, ik_file, id_file, results_dir,
+    calculate_feasible_muscle_forces(model_file, ik_file, id_file,
                                      '^pelvis_.*|^lumbar_.*',
-                                     'do_not_exclude_any_muscle')
+                                     'do_not_exclude_any_muscle',
+                                     results_dir)
