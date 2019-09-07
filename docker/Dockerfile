@@ -1,33 +1,34 @@
-FROM ubuntu:latest
+FROM ubuntu:18.04
 
 # required for tzdata
 ENV DEBIAN_FRONTEND=noninteractive
 
 # install ubuntu packages
 RUN apt-get update && apt-get -y upgrade && apt-get -y \
-install imagemagick python python-pip cython libgmp-dev \
-lrslib git python-tk liblapack-dev freeglut3-dev libxi-dev \
+install imagemagick python3 python3-pip cython libgmp-dev \
+lrslib git python3-tk liblapack-dev freeglut3-dev libxi-dev \
 libxmu-dev doxygen swig python-dev g++ openjdk-11-jdk \
-cmake-curses-gui tzdata nano
+cmake-curses-gui tzdata nano wget
+RUN alias python=python3
 
 # setup timezone
 RUN ln -fs /usr/share/zoneinfo/Europe/Athens /etc/localtime
 RUN dpkg-reconfigure --frontend noninteractive tzdata
 
 # setup python dependencies
-RUN pip install scipy numpy sympy pandas seaborn matplotlib \
-pycddlib tqdm pydy jupyter multipolyfit
+RUN pip3 install scipy numpy sympy pandas seaborn matplotlib \
+tqdm multipolyfit regex jupyter pycddlib
+RUN pip3 install pydy  # problem with pydy for python3
 
 # install and setup OpenSim
-ADD opensim-core-stable3.tar.xz /root/
-ENV SIMBODY_HOME=/root/opensim-core-stable3/dependencies/simbody
-ENV Simbody_DIR=$SIMBODY_HOME/lib/cmake/simbody
-ENV PATH=$SIMBODY_HOME/libexec/simbody:$PATH
-ENV LD_LIBRARY_PATH=$SIMBODY_HOME/lib:$LD_LIBRARY_PATH
-ENV OPENSIM_HOME=/root/opensim-core-stable3
-ENV OpenSim_DIR=$OPENSIM_HOME/lib64/cmake/OpenSim
+RUN wget https://sourceforge.net/projects/dependencies/files/opensim-core/opensim-core-ubunut18.04.tar.xz
+RUN tar -xvf opensim-core-ubunut18.04.tar.xz /root/
+ENV OPENSIM_HOME=/root/opensim-core
+ENV OpenSim_DIR=$OPENSIM_HOME/lib/cmake/OpenSim
 ENV LD_LIBRARY_PATH=$OPENSIM_HOME/lib:$LD_LIBRARY_PATH
-RUN cd /root/opensim-core-stable3/lib/python3.7/site-packages \
+ENV PATH=$OPENSIM_HOME/libexec/simbody:$PATH
+ENV PATH=$OPENSIM_HOME/bin:$PATH
+RUN cd /root/opensim-core/lib/python3.6/site-packages \
 && python setup.py install
 
 # copy demos to default directory

@@ -1,6 +1,7 @@
 from numpy import linalg, zeros, ones, hstack, asarray
 import itertools
 
+
 def basis_vector(n, i):
     """ Return an array like [0, 0, ..., 1, ..., 0, 0]
 
@@ -14,9 +15,11 @@ def basis_vector(n, i):
     x[i] = 1
     return x
 
+
 def as_tall(x):
     """ Turns a row vector into a column vector """
     return x.reshape(x.shape + (1,))
+
 
 def multipolyfit(xs, y, deg, full=False, model_out=False, powers_out=False):
     """
@@ -52,13 +55,14 @@ def multipolyfit(xs, y, deg, full=False, model_out=False, powers_out=False):
     rows = y.shape[0]
     xs = asarray(xs)
     num_covariates = xs.shape[1]
-    xs = hstack((ones((xs.shape[0], 1), dtype=xs.dtype) , xs))
+    xs = hstack((ones((xs.shape[0], 1), dtype=xs.dtype), xs))
 
-    generators = [basis_vector(num_covariates+1, i)
-                            for i in range(num_covariates+1)]
+    generators = [basis_vector(num_covariates+1, i) for i in
+                  range(num_covariates+1)]
 
     # All combinations of degrees
-    powers = list(map(sum, itertools.combinations_with_replacement(generators, deg)))
+    powers = list(map(sum,
+                      itertools.combinations_with_replacement(generators, deg)))
 
     # Raise data to specified degree pattern, stack in order
     A = hstack(asarray([as_tall((xs**p).prod(1)) for p in powers]))
@@ -72,6 +76,7 @@ def multipolyfit(xs, y, deg, full=False, model_out=False, powers_out=False):
         return beta, powers
     return beta
 
+
 def mk_model(beta, powers):
     """ Create a callable python function out of beta/powers from multipolyfit
 
@@ -81,16 +86,17 @@ def mk_model(beta, powers):
     # and returns an approximate y value
     def model(*args):
         num_covariates = len(powers[0]) - 1
-        if len(args)!=(num_covariates):
-            raise ValueError("Expected %d inputs"%num_covariates)
+        if len(args) != (num_covariates):
+            raise ValueError("Expected %d inputs" % num_covariates)
         xs = asarray((1,) + args)
-        return sum([coeff * (xs**p).prod()
-                             for p, coeff in zip(powers, beta)])
+        return sum([coeff * (xs**p).prod() for p, coeff in zip(powers,
+                                                               beta)])
     return model
+
 
 def mk_sympy_function(beta, powers):
     from sympy import symbols, Add, Mul, S
     num_covariates = len(powers[0]) - 1
-    xs = (S.One,) + symbols('x0:%d'%num_covariates)
+    xs = (S.One,) + symbols('x0:%d' % num_covariates)
     return Add(*[coeff * Mul(*[x**deg for x, deg in zip(xs, power)])
-                        for power, coeff in zip(powers, beta)])
+                 for power, coeff in zip(powers, beta)])
